@@ -1,0 +1,27 @@
+hash: 49eb39f47a36521082e8c350a102ed9daa0b35f49aa8b0dfabbe564ead6a6915
+updated: 2019-08-01T12:39:53.362525006-03:00
+imports:
+- name: github.com/uol/gobol
+  version: 65d31a5f14860ed345d16da5511e9d0f49e5c603
+  subpackages:
+  - timeline
+  - util
+testImports:
+- name: github.com/json-iterator/go
+  version: 27518f6661eba504be5a7a9a9f6d9460d892ade3
+- name: github.com/modern-go/concurrent
+  version: bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94
+- name: github.com/modern-go/reflect2
+  version: 4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd
+- name: go.uber.org/atomic
+  version: df976f2515e274675050de7b3f42545de80594fd
+- name: go.uber.org/multierr
+  version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
+- name: go.uber.org/zap
+  version: ff33455a0e382e8a81d14dd7c922020b6b5e7982
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - zapcore

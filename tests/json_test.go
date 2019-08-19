@@ -325,3 +325,34 @@ func TestVariableCollections(t *testing.T) {
 	actual := CollectionJSON{}
 	validateJSON(t, result, &expected, &actual)
 }
+
+// TestJSONEncoding - test serializing a JSON with double quotes as values
+func TestJSONEncoding(t *testing.T) {
+
+	newType := SimpleJSON{
+		Boolean: false,
+		Float:   40,
+		Integer: -20,
+		Text:    `"unchanged"`,
+	}
+
+	s := createSerializer()
+	addType(t, s, "text-const", newType)
+	addType(t, s, "text-variable", newType, "text")
+
+	result := serialize(t, s, "text-const")
+	expected := newType
+
+	actual := SimpleJSON{}
+	validateJSON(t, result, &expected, &actual)
+
+	result = serialize(t, s, "text-variable", "text", `"changed"`)
+	expected = SimpleJSON{
+		Boolean: false,
+		Float:   40,
+		Integer: -20,
+		Text:    `"changed"`,
+	}
+
+	validateJSON(t, result, &expected, &actual)
+}

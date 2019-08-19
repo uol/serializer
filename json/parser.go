@@ -268,7 +268,7 @@ func (j *Serializer) getFormatSymbol(k reflect.Kind) (string, error) {
 
 	switch j.normalizeKind(k) {
 	case reflect.String:
-		return "\"%s\"", nil
+		return "%s", nil
 	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint8, reflect.Uintptr, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int8:
 		return "%d", nil
 	case reflect.Float32, reflect.Float64:
@@ -313,7 +313,7 @@ func (j *Serializer) getValueFromField(field *reflect.StructField, value *reflec
 	case reflect.String:
 		var b strings.Builder
 		s := value.String()
-		b.Grow(len(s) + 2)
+		b.Grow(len(s) + 2 + (strings.Count(s, `"`) * 2))
 		j.writeStringValue(s, &b)
 		return b.String(), nil
 	case reflect.Int:
@@ -334,9 +334,17 @@ func (j *Serializer) getValueFromField(field *reflect.StructField, value *reflec
 // writeStringValue - writes a string in JSON format
 func (j *Serializer) writeStringValue(value string, b *strings.Builder) {
 
-	b.WriteString("\"")
-	b.WriteString(value)
-	b.WriteString("\"")
+	b.WriteByte(doubleQuote)
+
+	for _, c := range []byte(value) {
+		if c == doubleQuote {
+			b.WriteString(escapedDoubleQuote)
+		} else {
+			b.WriteByte(c)
+		}
+	}
+
+	b.WriteByte(doubleQuote)
 }
 
 // writePropertyString - writes a string in JSON format

@@ -7,6 +7,11 @@ const (
 	propertyVariable variableType = 1
 )
 
+var (
+	doubleQuote        = ([]byte("\""))[0]
+	escapedDoubleQuote = "\\\""
+)
+
 // mappedJSON - internal mapped JSON struct
 type mappedJSON struct {
 	format       string

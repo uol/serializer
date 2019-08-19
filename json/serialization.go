@@ -69,6 +69,11 @@ func (j *Serializer) Serialize(name string, parameters ...interface{}) (string, 
 		value := reflect.ValueOf(genericValue)
 		kind := value.Kind()
 
+		key, ok := m.variableMap[varName]
+		if !ok {
+			return "", fmt.Errorf(`variable "%s" does not exist`, varName)
+		}
+
 		if kind == reflect.Map {
 
 			strMap, err := j.serializeMap(&value)
@@ -76,7 +81,7 @@ func (j *Serializer) Serialize(name string, parameters ...interface{}) (string, 
 				return "", err
 			}
 
-			params[m.variableMap[varName]] = strMap
+			params[key] = strMap
 
 		} else if kind == reflect.Array || kind == reflect.Slice {
 
@@ -85,11 +90,35 @@ func (j *Serializer) Serialize(name string, parameters ...interface{}) (string, 
 				return "", err
 			}
 
-			params[m.variableMap[varName]] = strArray
+			params[key] = strArray
 
 		} else {
 
-			params[m.variableMap[varName]] = genericValue
+			if kind == reflect.String {
+
+				str := value.String()
+
+				var b strings.Builder
+				b.Grow(len(str) + 2 + (strings.Count(str, `"`) * 2))
+
+				b.WriteByte(doubleQuote)
+
+				for _, c := range []byte(str) {
+					if c == doubleQuote {
+						b.WriteString(escapedDoubleQuote)
+					} else {
+						b.WriteByte(c)
+					}
+				}
+
+				b.WriteByte(doubleQuote)
+
+				params[key] = b.String()
+
+			} else {
+
+				params[key] = genericValue
+			}
 		}
 	}
 

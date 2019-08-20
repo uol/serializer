@@ -11,6 +11,11 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+/**
+* Some benchmark tests.
+* @author rnojiri
+**/
+
 var jsonIter = jsoniter.ConfigCompatibleWithStandardLibrary
 var numbers = []timeline.NumberPoint{
 	timeline.NumberPoint{

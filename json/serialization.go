@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+/**
+* Has all serialization methods from the JSON serializer.
+* @author rnojiri
+**/
+
 // SerializeArray - serializes an array of jsons
 func (j *Serializer) SerializeArray(parameters ...Parameters) (string, error) {
 

@@ -1,5 +1,10 @@
 package json
 
+/**
+* Has all structs used by the JSON serializer.
+* @author rnojiri
+**/
+
 type variableType uint8
 
 const (

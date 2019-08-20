@@ -12,6 +12,11 @@ import (
 	serializer "github.com/uol/serializer/json"
 )
 
+/**
+* Has unit tests for the JSON serializer.
+* @author rnojiri
+**/
+
 type SimpleJSON struct {
 	Text    string  `json:"text"`
 	Integer int     `json:"integer"`

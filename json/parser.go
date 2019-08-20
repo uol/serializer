@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+/**
+* Has all struct parsing methods from the JSON serializer.
+* @author rnojiri
+**/
+
 // Add - adds a new JSON mapping
 func (j *Serializer) Add(name string, item interface{}, variablePath ...string) error {
 

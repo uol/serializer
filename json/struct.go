@@ -31,8 +31,8 @@ type Serializer struct {
 	mapping    map[string]*mappedJSON
 }
 
-// Parameters - a configuration to render a json
-type Parameters struct {
+// ArrayItem - a configuration to render a json
+type ArrayItem struct {
 	Name       string
 	Parameters []interface{}
 }

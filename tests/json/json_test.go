@@ -1,4 +1,4 @@
-package serializer_test
+package json
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/uol/gobol/timeline"
+	"github.com/uol/gobol/structs"
 	serializer "github.com/uol/serializer/json"
 )
 
@@ -103,10 +103,10 @@ func TestArrayNoVariables(t *testing.T) {
 	s := createSerializer()
 	addType(t, s, "s", newType)
 
-	result, err := s.SerializeArray([]serializer.Parameters{
-		serializer.Parameters{Name: "s"},
-		serializer.Parameters{Name: "s"},
-		serializer.Parameters{Name: "s"},
+	result, err := s.SerializeArray([]serializer.ArrayItem{
+		serializer.ArrayItem{Name: "s"},
+		serializer.ArrayItem{Name: "s"},
+		serializer.ArrayItem{Name: "s"},
 	}...)
 	if !assert.NoError(t, err, "error serializing to array") {
 		return
@@ -164,10 +164,10 @@ func TestArrayVariables(t *testing.T) {
 	s := createSerializer()
 	addType(t, s, "s", newType, "boolean", "float", "integer")
 
-	result, err := s.SerializeArray([]serializer.Parameters{
-		serializer.Parameters{Name: "s", Parameters: []interface{}{"boolean", true, "float", 1.0, "integer", 1}},
-		serializer.Parameters{Name: "s", Parameters: []interface{}{"boolean", false, "float", 2.0, "integer", 2}},
-		serializer.Parameters{Name: "s", Parameters: []interface{}{"boolean", true, "float", 3.0, "integer", 3}},
+	result, err := s.SerializeArray([]serializer.ArrayItem{
+		serializer.ArrayItem{Name: "s", Parameters: []interface{}{"boolean", true, "float", 1.0, "integer", 1}},
+		serializer.ArrayItem{Name: "s", Parameters: []interface{}{"boolean", false, "float", 2.0, "integer", 2}},
+		serializer.ArrayItem{Name: "s", Parameters: []interface{}{"boolean", true, "float", 3.0, "integer", 3}},
 	}...)
 	if !assert.NoError(t, err, "error serializing to array") {
 		return
@@ -201,8 +201,8 @@ func TestArrayVariables(t *testing.T) {
 // TestCompositeStructJSON - test a complex json serialization
 func TestCompositeStructJSON(t *testing.T) {
 
-	p := timeline.NumberPoint{
-		Point: timeline.Point{
+	p := structs.NumberPoint{
+		Point: structs.Point{
 			Metric:    "metric1",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -221,8 +221,8 @@ func TestCompositeStructJSON(t *testing.T) {
 		"tags.host", "loghost",
 	)
 
-	expected := timeline.NumberPoint{
-		Point: timeline.Point{
+	expected := structs.NumberPoint{
+		Point: structs.Point{
 			Metric:    p.Metric,
 			Timestamp: p.Timestamp,
 			Tags: map[string]string{
@@ -234,7 +234,7 @@ func TestCompositeStructJSON(t *testing.T) {
 		Value: 100.5,
 	}
 
-	actual := timeline.NumberPoint{}
+	actual := structs.NumberPoint{}
 	validateJSON(t, result, &expected, &actual)
 }
 

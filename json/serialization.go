@@ -12,19 +12,19 @@ import (
 **/
 
 // SerializeArray - serializes an array of jsons
-func (j *Serializer) SerializeArray(parameters ...Parameters) (string, error) {
+func (j *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
 
-	numParameters := len(parameters)
-	if numParameters == 0 {
+	numItems := len(items)
+	if numItems == 0 {
 		return "", nil
 	}
 
 	var err error
 	var totalSize int
-	jsons := make([]string, numParameters)
+	jsons := make([]string, numItems)
 
-	for i := 0; i < numParameters; i++ {
-		jsons[i], err = j.Serialize(parameters[i].Name, parameters[i].Parameters...)
+	for i := 0; i < numItems; i++ {
+		jsons[i], err = j.Serialize(items[i].Name, items[i].Parameters...)
 		if err != nil {
 			return "", err
 		}
@@ -32,15 +32,15 @@ func (j *Serializer) SerializeArray(parameters ...Parameters) (string, error) {
 	}
 
 	var b strings.Builder
-	b.Grow(totalSize + (numParameters - 1) + 2)
+	b.Grow(totalSize + (numItems - 1) + 2)
 
 	b.WriteString("[")
 
-	for i := 0; i < numParameters; i++ {
+	for i := 0; i < numItems; i++ {
 
 		b.WriteString(jsons[i])
 
-		if i < numParameters-1 {
+		if i < numItems-1 {
 			b.WriteString(",")
 		}
 	}

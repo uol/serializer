@@ -271,7 +271,7 @@ func (j *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence
 // getFormatSymbol - returns the format from the struct field
 func (j *Serializer) getFormatSymbol(k reflect.Kind) (string, error) {
 
-	switch j.normalizeKind(k) {
+	switch k {
 	case reflect.String:
 		return "%s", nil
 	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint8, reflect.Uintptr, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int8:
@@ -285,25 +285,6 @@ func (j *Serializer) getFormatSymbol(k reflect.Kind) (string, error) {
 	}
 }
 
-// normalizeKind - normalizes the kind to a more generic type
-func (j *Serializer) normalizeKind(k reflect.Kind) reflect.Kind {
-
-	switch k {
-	case reflect.String:
-		return reflect.String
-	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint8, reflect.Uintptr, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int8:
-		return reflect.Int
-	case reflect.Float32, reflect.Float64:
-		return reflect.Float64
-	case reflect.Bool:
-		return reflect.Bool
-	case reflect.Interface:
-		return reflect.Interface
-	default:
-		return reflect.Invalid
-	}
-}
-
 // getValueFromField - returns the value from the struct field
 func (j *Serializer) getValueFromField(field *reflect.StructField, value *reflect.Value) (string, error) {
 
@@ -314,16 +295,16 @@ func (j *Serializer) getValueFromField(field *reflect.StructField, value *reflec
 		kind = field.Type.Kind()
 	}
 
-	switch j.normalizeKind(kind) {
+	switch kind {
 	case reflect.String:
 		var b strings.Builder
 		s := value.String()
 		b.Grow(len(s) + 2 + (strings.Count(s, `"`) * 2))
 		j.writeStringValue(s, &b)
 		return b.String(), nil
-	case reflect.Int:
+	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint8, reflect.Uintptr, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int8:
 		return strconv.FormatInt(value.Int(), 10), nil
-	case reflect.Float64:
+	case reflect.Float32, reflect.Float64:
 		return strconv.FormatFloat(value.Float(), 'f', -1, 64), nil
 	case reflect.Bool:
 		return strconv.FormatBool(value.Bool()), nil

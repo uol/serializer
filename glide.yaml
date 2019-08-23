@@ -1,9 +1,9 @@
 package: github.com/uol/serializer
 import:
-testImport:
-- package: github.com/json-iterator/go
-  version: ^1.1.7
 - package: github.com/uol/gobol
   version: ^1.22.0
   subpackages:
-  - timeline\
+  - structs
+testImport:
+- package: github.com/json-iterator/go
+  version: ^1.1.7

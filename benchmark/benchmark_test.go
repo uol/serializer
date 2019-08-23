@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/uol/gobol/timeline"
+	"github.com/uol/gobol/structs"
 	serializer "github.com/uol/serializer/json"
 
 	jsoniter "github.com/json-iterator/go"
@@ -17,9 +17,9 @@ import (
 **/
 
 var jsonIter = jsoniter.ConfigCompatibleWithStandardLibrary
-var numbers = []timeline.NumberPoint{
-	timeline.NumberPoint{
-		Point: timeline.Point{
+var numbers = []structs.NumberPoint{
+	structs.NumberPoint{
+		Point: structs.Point{
 			Metric:    "metric1",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -31,8 +31,8 @@ var numbers = []timeline.NumberPoint{
 		Value: 1.0,
 	},
 
-	timeline.NumberPoint{
-		Point: timeline.Point{
+	structs.NumberPoint{
+		Point: structs.Point{
 			Metric:    "metric2",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -45,9 +45,9 @@ var numbers = []timeline.NumberPoint{
 	},
 }
 
-var texts = []timeline.TextPoint{
-	timeline.TextPoint{
-		Point: timeline.Point{
+var texts = []structs.TextPoint{
+	structs.TextPoint{
+		Point: structs.Point{
 			Metric:    "metric1",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -59,8 +59,8 @@ var texts = []timeline.TextPoint{
 		Text: "test1",
 	},
 
-	timeline.TextPoint{
-		Point: timeline.Point{
+	structs.TextPoint{
+		Point: structs.Point{
 			Metric:    "metric2",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -93,13 +93,13 @@ func BenchmarkSerializer(b *testing.B) {
 	s.Add("t", texts[0], "metric", "text")
 
 	for n := 0; n < b.N; n++ {
-		s.SerializeArray([]serializer.Parameters{
-			serializer.Parameters{Name: "n", Parameters: []interface{}{"metric", "number", "value", 1.0}},
-			serializer.Parameters{Name: "n", Parameters: []interface{}{"metric", "number", "value", 2.0}},
+		s.SerializeArray([]serializer.ArrayItem{
+			serializer.ArrayItem{Name: "n", Parameters: []interface{}{"metric", "number", "value", 1.0}},
+			serializer.ArrayItem{Name: "n", Parameters: []interface{}{"metric", "number", "value", 2.0}},
 		}...)
-		s.SerializeArray([]serializer.Parameters{
-			serializer.Parameters{Name: "t", Parameters: []interface{}{"metric", "text", "text", "1.0"}},
-			serializer.Parameters{Name: "t", Parameters: []interface{}{"metric", "text", "text", "2.0"}},
+		s.SerializeArray([]serializer.ArrayItem{
+			serializer.ArrayItem{Name: "t", Parameters: []interface{}{"metric", "text", "text", "1.0"}},
+			serializer.ArrayItem{Name: "t", Parameters: []interface{}{"metric", "text", "text", "2.0"}},
 		}...)
 	}
 }

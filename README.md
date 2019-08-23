@@ -6,7 +6,7 @@ This library provides common data serialization focusing on:
 - **memory utilization**
 - **low cost cache**
 
-The negative side of all of this is to sacrifice some of:
+The negative side is to sacrifice some of:
 
 - **usability**
 - **flexibility**
@@ -77,5 +77,20 @@ result, _ := jsonSerializer.Serialize("mySimpleJSON",
     "float", 7.0,
     "boolean", false,
 )
+```
+For more complex examples, please take a look in the tests directory.
+
+### OpenTSDB
+
+The OpenTSDB's data input format serializer. It serializes the line data to send points to a OpenTSDB database telnet listener. The line format can be found in their "Writing Data" page  [here](http://opentsdb.net/docs/build/html/user_guide/writing/index.html).
+
+##### Example:
+Some basic point serialization:
+```Go
+import serializer "github.com/uol/serializer/opentsdb"
+...
+opentsdbSerializer := serializer.New(100) //sets the default string buffer size
+// now we can serialize some data calling function Serialize with parameters: metric, timestamp, value and a list of tags using the format: key, value, key, value...
+result, _ := opentsdbSerializer.Serialize("some.metric", time.Now().Unix(), 1.0, "host", "localhost", "number", 1)
 ```
 For more complex examples, please take a look in the tests directory.

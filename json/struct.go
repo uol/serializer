@@ -1,5 +1,7 @@
 package json
 
+import "github.com/uol/serializer/serializer"
+
 /**
 * Has all structs used by the JSON serializer.
 * @author rnojiri
@@ -27,6 +29,7 @@ type mappedJSON struct {
 
 // Serializer - the json serializer
 type Serializer struct {
+	serializer.Serializer
 	bufferSize int
 	mapping    map[string]*mappedJSON
 }

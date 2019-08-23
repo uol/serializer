@@ -1,5 +1,7 @@
 package opentsdb
 
+import "github.com/uol/serializer/serializer"
+
 /**
 * Has all structs used by the OpenTSDB serializer.
 * @author rnojiri
@@ -7,6 +9,7 @@ package opentsdb
 
 // Serializer - the json serializer
 type Serializer struct {
+	serializer.Serializer
 	bufferSize int
 }
 

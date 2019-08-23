@@ -11,6 +11,42 @@ import (
 * @author rnojiri
 **/
 
+// SerializeGeneric - serializes with the correct cast based on the struct ArrayItem
+func (j *Serializer) SerializeGeneric(item interface{}) (string, error) {
+
+	if item == nil {
+		return "", nil
+	}
+
+	casted, ok := item.(ArrayItem)
+	if !ok {
+		return "", fmt.Errorf("unexpected instance type")
+	}
+
+	return j.Serialize(casted.Name, casted.Parameters...)
+}
+
+// SerializeGenericArray - serializes with the correct cast based on the struct ArrayItem
+func (j *Serializer) SerializeGenericArray(items ...interface{}) (string, error) {
+
+	numItems := len(items)
+	if numItems == 0 {
+		return "", nil
+	}
+
+	casted := make([]ArrayItem, numItems)
+
+	var ok bool
+	for i := 0; i < numItems; i++ {
+		casted[i], ok = items[i].(ArrayItem)
+		if !ok {
+			return "", fmt.Errorf("unexpected instance type on index: %d", i)
+		}
+	}
+
+	return j.SerializeArray(casted...)
+}
+
 // SerializeArray - serializes an array of jsons
 func (j *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
 

@@ -10,6 +10,7 @@ import (
 
 	"github.com/uol/gobol/structs"
 	serializer "github.com/uol/serializer/json"
+	"github.com/uol/serializer/tests"
 )
 
 /**
@@ -76,8 +77,8 @@ func TestNoVariables(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   3.14,
-		Integer: 10,
+		Float:   float64(tests.GenerateRandom(0, 100)),
+		Integer: tests.GenerateRandom(0, 1000),
 		Text:    "test",
 	}
 
@@ -95,8 +96,8 @@ func TestArrayNoVariables(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: false,
-		Float:   1.2,
-		Integer: 1010,
+		Float:   float64(tests.GenerateRandom(0, 100)),
+		Integer: tests.GenerateRandom(0, 1000),
 		Text:    "array",
 	}
 
@@ -127,8 +128,8 @@ func TestVariables(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   50,
-		Integer: -10,
+		Float:   float64(tests.GenerateRandom(0, 100)),
+		Integer: tests.GenerateRandom(0, 1000),
 		Text:    "variable",
 	}
 
@@ -142,8 +143,8 @@ func TestVariables(t *testing.T) {
 
 	expected := SimpleJSON{
 		Boolean: false,
-		Float:   50,
-		Integer: -10,
+		Float:   newType.Float,
+		Integer: newType.Integer,
 		Text:    "changed",
 	}
 
@@ -156,8 +157,8 @@ func TestArrayVariables(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: false,
-		Float:   1.2,
-		Integer: 1010,
+		Float:   float64(tests.GenerateRandom(0, 100)),
+		Integer: tests.GenerateRandom(0, 1000),
 		Text:    "array",
 	}
 
@@ -336,8 +337,8 @@ func TestJSONEncoding(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: false,
-		Float:   40,
-		Integer: -20,
+		Float:   float64(tests.GenerateRandom(0, 100)),
+		Integer: tests.GenerateRandom(0, 1000),
 		Text:    `"unchanged"`,
 	}
 
@@ -354,10 +355,80 @@ func TestJSONEncoding(t *testing.T) {
 	result = serialize(t, s, "text-variable", "text", `"changed"`)
 	expected = SimpleJSON{
 		Boolean: false,
-		Float:   40,
-		Integer: -20,
+		Float:   newType.Float,
+		Integer: newType.Integer,
 		Text:    `"changed"`,
 	}
 
 	validateJSON(t, result, &expected, &actual)
+}
+
+// TestGenericSerializer - test using the generic way to serialize
+func TestGenericSerializer(t *testing.T) {
+
+	newType := SimpleJSON{
+		Boolean: true,
+		Float:   float64(tests.GenerateRandom(0, 100)),
+		Integer: tests.GenerateRandom(0, 1000),
+		Text:    "generic",
+	}
+
+	s := createSerializer()
+	addType(t, s, "s", newType, "boolean", "text")
+
+	result1 := serialize(t, s, "s",
+		"boolean", false,
+		"text", "changed",
+	)
+
+	result2, err := s.SerializeGeneric(serializer.ArrayItem{
+		Name: "s",
+		Parameters: []interface{}{
+			"boolean", false,
+			"text", "changed",
+		},
+	})
+
+	if !assert.NoError(t, err, "error using generic serialization") {
+		panic(err)
+	}
+
+	assert.Equal(t, result1, result2, "expected same output")
+}
+
+// TestGenericArraySerializer - test using the generic way to serialize
+func TestGenericArraySerializer(t *testing.T) {
+
+	newType := SimpleJSON{
+		Boolean: true,
+		Float:   float64(tests.GenerateRandom(0, 100)),
+		Integer: tests.GenerateRandom(0, 1000),
+		Text:    "generic",
+	}
+
+	s := createSerializer()
+	addType(t, s, "s", newType, "boolean", "float", "integer")
+
+	itemArray := []serializer.ArrayItem{
+		serializer.ArrayItem{Name: "s", Parameters: []interface{}{"boolean", true, "float", 1.0, "integer", 1}},
+		serializer.ArrayItem{Name: "s", Parameters: []interface{}{"boolean", false, "float", 2.0, "integer", 2}},
+		serializer.ArrayItem{Name: "s", Parameters: []interface{}{"boolean", true, "float", 3.0, "integer", 3}},
+	}
+
+	result1, err := s.SerializeArray(itemArray...)
+	if !assert.NoError(t, err, "error serializing to array") {
+		return
+	}
+
+	interfaceArray := []interface{}{
+		itemArray[0], itemArray[1], itemArray[2],
+	}
+
+	result2, err := s.SerializeGenericArray(interfaceArray...)
+
+	if !assert.NoError(t, err, "error using generic array serialization") {
+		panic(err)
+	}
+
+	assert.Equal(t, result1, result2, "expected same output")
 }

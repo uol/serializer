@@ -9,13 +9,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	serializer "github.com/uol/serializer/opentsdb"
+	"github.com/uol/serializer/tests"
 )
-
-// genRandom - generates a random number
-func genRandom(min, max int) int {
-
-	return (rand.Intn(max-min+1) + min)
-}
 
 // createSerializer - creates a new serializer
 func createSerializer() *serializer.Serializer {
@@ -55,7 +50,7 @@ func TestSingleLineStringTags(t *testing.T) {
 	line := serializer.ArrayItem{
 		Metric:    "single",
 		Timestamp: time.Now().Unix(),
-		Value:     float64(genRandom(1, 100)),
+		Value:     float64(tests.GenerateRandom(1, 100)),
 		Tags: []interface{}{
 			"host", "localhost",
 			"ttl", "1",
@@ -76,12 +71,12 @@ func TestSingleLineMixedTypeTags(t *testing.T) {
 	line := serializer.ArrayItem{
 		Metric:    "single",
 		Timestamp: time.Now().Unix(),
-		Value:     float64(genRandom(10, 100)) + 0.5,
+		Value:     float64(tests.GenerateRandom(10, 100)) + 0.5,
 		Tags: []interface{}{
 			"host", "localhost",
 			"ttl", 1,
-			"float", float64(genRandom(300, 1000)) + 0.1,
-			"boolean", genRandom(0, 10) >= 5,
+			"float", float64(tests.GenerateRandom(300, 1000)) + 0.1,
+			"boolean", tests.GenerateRandom(0, 10) >= 5,
 		},
 	}
 
@@ -129,7 +124,7 @@ func TestMultiLineMixedTypeTags(t *testing.T) {
 
 	s := createSerializer()
 
-	const size = 2
+	const size = 24
 	format := ""
 	lines := make([]serializer.ArrayItem, size)
 	args := []interface{}{}
@@ -143,8 +138,8 @@ func TestMultiLineMixedTypeTags(t *testing.T) {
 			Tags: []interface{}{
 				"host", "host" + strconv.Itoa(i),
 				"index", i,
-				"float", float64(genRandom(300, 1000)) + 0.1,
-				"boolean", genRandom(0, 10) >= 5,
+				"float", float64(tests.GenerateRandom(300, 1000)) + 0.1,
+				"boolean", tests.GenerateRandom(0, 10) >= 5,
 			},
 		}
 
@@ -157,4 +152,71 @@ func TestMultiLineMixedTypeTags(t *testing.T) {
 	expected := fmt.Sprintf(format, args...)
 
 	assert.Equal(t, expected, result, "expected same string")
+}
+
+// TestGenericSerializer - test using the generic way to serialize
+func TestGenericSerializer(t *testing.T) {
+
+	s := createSerializer()
+
+	line := serializer.ArrayItem{
+		Metric:    "single",
+		Timestamp: time.Now().Unix(),
+		Value:     float64(tests.GenerateRandom(10, 100)) + 0.5,
+		Tags: []interface{}{
+			"host", "localhost",
+			"ttl", 1,
+			"float", float64(tests.GenerateRandom(300, 1000)) + 0.1,
+			"boolean", tests.GenerateRandom(0, 10) >= 5,
+		},
+	}
+
+	result1 := serialize(t, s, line)
+	result2, err := s.SerializeGeneric(line)
+	if !assert.NoError(t, err, "error using generic serialization") {
+		panic(err)
+	}
+
+	assert.Equal(t, result1, result2, "expected same output")
+}
+
+// TestGenericArraySerializer - test using the generic way to serialize
+func TestGenericArraySerializer(t *testing.T) {
+
+	s := createSerializer()
+
+	const size = 24
+	format := ""
+	lines := make([]serializer.ArrayItem, size)
+	interfaceLine := make([]interface{}, size)
+	args := []interface{}{}
+
+	for i := 0; i < size; i++ {
+
+		lines[i] = serializer.ArrayItem{
+			Metric:    "multi" + strconv.Itoa(i),
+			Timestamp: time.Now().Unix(),
+			Value:     float64(i),
+			Tags: []interface{}{
+				"host", "host" + strconv.Itoa(i),
+				"index", i,
+				"float", float64(tests.GenerateRandom(300, 1000)) + 0.1,
+				"boolean", tests.GenerateRandom(0, 10) >= 5,
+			},
+		}
+
+		interfaceLine[i] = lines[i]
+
+		args = append(args, lines[i].Metric, lines[i].Timestamp, lines[i].Value, lines[i].Tags[0], lines[i].Tags[1], lines[i].Tags[2], lines[i].Tags[3], lines[i].Tags[4], lines[i].Tags[5], lines[i].Tags[6], lines[i].Tags[7])
+
+		format += "put %s %d %.0f %s=%s %s=%d %s=%.1f %s=%t\n"
+	}
+
+	result1 := serializeArray(t, s, lines)
+	result2, err := s.SerializeGenericArray(interfaceLine...)
+	if !assert.NoError(t, err, "error using generic serialization") {
+		panic(err)
+	}
+
+	assert.Equal(t, result1, result2, "expected same output")
 }

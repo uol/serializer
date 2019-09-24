@@ -13,7 +13,7 @@ import (
 **/
 
 // Add - adds a new JSON mapping
-func (j *Serializer) Add(name string, item interface{}, variablePath ...string) error {
+func (s *Serializer) Add(name string, item interface{}, variablePath ...string) error {
 
 	variablePathMap := map[string]struct{}{}
 	if len(variablePath) > 0 {
@@ -22,27 +22,27 @@ func (j *Serializer) Add(name string, item interface{}, variablePath ...string) 
 		}
 	}
 
-	m, err := j.mapJSON(item, variablePathMap)
+	m, err := s.mapJSON(item, variablePathMap)
 	if err != nil {
 		return err
 	}
 
-	j.mapping[name] = m
+	s.mapping[name] = m
 
 	return nil
 }
 
 // mapJSON - maps a new JSON struct
-func (j *Serializer) mapJSON(item interface{}, variablePaths map[string]struct{}) (*mappedJSON, error) {
+func (s *Serializer) mapJSON(item interface{}, variablePaths map[string]struct{}) (*mappedJSON, error) {
 
 	varSequence := []string{}
 
 	var b strings.Builder
-	b.Grow(j.bufferSize)
+	b.Grow(s.bufferSize)
 
 	b.WriteString("{")
 
-	err := j.mapStruct(item, &b, &varSequence, variablePaths, "")
+	err := s.mapStruct(item, &b, &varSequence, variablePaths, "")
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +63,9 @@ func (j *Serializer) mapJSON(item interface{}, variablePaths map[string]struct{}
 }
 
 // writeMapInStringFormat - writes the map string format
-func (j *Serializer) writeMapInStringFormat(field *reflect.StructField, value *reflect.Value, b *strings.Builder, varSequence *[]string, variablePaths map[string]struct{}, path string) (bool, error) {
+func (s *Serializer) writeMapInStringFormat(field *reflect.StructField, value *reflect.Value, b *strings.Builder, varSequence *[]string, variablePaths map[string]struct{}, path string) (bool, error) {
 
-	keep, variableType, currentPath := j.fieldToProperty(field, b, varSequence, variablePaths, path)
+	keep, variableType, currentPath := s.fieldToProperty(field, b, varSequence, variablePaths, path)
 	if !keep {
 		return false, nil
 	}
@@ -82,15 +82,15 @@ func (j *Serializer) writeMapInStringFormat(field *reflect.StructField, value *r
 	for hasNext {
 
 		key := it.Key().String()
-		keyPath := j.buildPath(currentPath, key)
+		keyPath := s.buildPath(currentPath, key)
 
-		j.writePropertyString(key, b)
+		s.writePropertyString(key, b)
 
 		val := it.Value()
 
 		if _, ok := variablePaths[keyPath]; ok {
 
-			formatSymbol, err := j.getFormatSymbol(val.Type().Kind())
+			formatSymbol, err := s.getFormatSymbol(val.Type().Kind())
 			if err != nil {
 				return false, err
 			}
@@ -100,7 +100,7 @@ func (j *Serializer) writeMapInStringFormat(field *reflect.StructField, value *r
 
 		} else {
 
-			strVal, err := j.getValueFromField(nil, &val)
+			strVal, err := s.getValueFromField(nil, &val)
 			if err != nil {
 				return false, err
 			}
@@ -120,9 +120,9 @@ func (j *Serializer) writeMapInStringFormat(field *reflect.StructField, value *r
 }
 
 // writeArrayInStringFormat - writes in array string format
-func (j *Serializer) writeArrayInStringFormat(field *reflect.StructField, value *reflect.Value, b *strings.Builder, varSequence *[]string, variablePaths map[string]struct{}, path string) (bool, error) {
+func (s *Serializer) writeArrayInStringFormat(field *reflect.StructField, value *reflect.Value, b *strings.Builder, varSequence *[]string, variablePaths map[string]struct{}, path string) (bool, error) {
 
-	keep, variableType, currentPath := j.fieldToProperty(field, b, varSequence, variablePaths, path)
+	keep, variableType, currentPath := s.fieldToProperty(field, b, varSequence, variablePaths, path)
 	if !keep {
 		return false, nil
 	}
@@ -150,7 +150,7 @@ func (j *Serializer) writeArrayInStringFormat(field *reflect.StructField, value 
 
 		if _, ok := variablePaths[indexBuilder.String()]; ok {
 
-			formatSymbol, err := j.getFormatSymbol(val.Type().Kind())
+			formatSymbol, err := s.getFormatSymbol(val.Type().Kind())
 			if err != nil {
 				return false, err
 			}
@@ -160,7 +160,7 @@ func (j *Serializer) writeArrayInStringFormat(field *reflect.StructField, value 
 
 		} else {
 
-			strVal, err := j.getValueFromField(nil, &val)
+			strVal, err := s.getValueFromField(nil, &val)
 			if err != nil {
 				return false, err
 			}
@@ -181,7 +181,7 @@ func (j *Serializer) writeArrayInStringFormat(field *reflect.StructField, value 
 }
 
 // mapStruct - maps all variables contained in the JSON struct
-func (j *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence *[]string, variablePaths map[string]struct{}, path string) error {
+func (s *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence *[]string, variablePaths map[string]struct{}, path string) error {
 
 	v := reflect.ValueOf(item)
 	t := reflect.TypeOf(item)
@@ -193,13 +193,13 @@ func (j *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence
 
 		if field.Type.Kind() == reflect.Struct {
 
-			isSubObject, _, currentPath := j.fieldToProperty(&field, b, varSequence, variablePaths, path)
+			isSubObject, _, currentPath := s.fieldToProperty(&field, b, varSequence, variablePaths, path)
 			if isSubObject {
 				b.WriteString("{")
 			}
 
 			x := v.Field(i).Interface()
-			err := j.mapStruct(x, b, varSequence, variablePaths, currentPath)
+			err := s.mapStruct(x, b, varSequence, variablePaths, currentPath)
 			if err != nil {
 				return err
 			}
@@ -217,7 +217,7 @@ func (j *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence
 		} else if field.Type.Kind() == reflect.Map {
 
 			fv := v.Field(i)
-			j.writeMapInStringFormat(&field, &fv, b, varSequence, variablePaths, path)
+			s.writeMapInStringFormat(&field, &fv, b, varSequence, variablePaths, path)
 			if i < numFields-1 {
 				b.WriteString(",")
 			}
@@ -227,7 +227,7 @@ func (j *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence
 		} else if field.Type.Kind() == reflect.Array || field.Type.Kind() == reflect.Slice {
 
 			fv := v.Field(i)
-			j.writeArrayInStringFormat(&field, &fv, b, varSequence, variablePaths, path)
+			s.writeArrayInStringFormat(&field, &fv, b, varSequence, variablePaths, path)
 			if i < numFields-1 {
 				b.WriteString(",")
 			}
@@ -235,14 +235,14 @@ func (j *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence
 			continue
 		}
 
-		keep, varType, _ := j.fieldToProperty(&field, b, varSequence, variablePaths, path)
+		keep, varType, _ := s.fieldToProperty(&field, b, varSequence, variablePaths, path)
 		if !keep {
 			continue
 		}
 
 		if varType == propertyVariable {
 
-			format, err := j.getFormatSymbol(field.Type.Kind())
+			format, err := s.getFormatSymbol(field.Type.Kind())
 			if err != nil {
 				return err
 			}
@@ -252,7 +252,7 @@ func (j *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence
 		} else {
 
 			vf := v.Field(i)
-			value, err := j.getValueFromField(&field, &vf)
+			value, err := s.getValueFromField(&field, &vf)
 			if err != nil {
 				return err
 			}
@@ -269,7 +269,7 @@ func (j *Serializer) mapStruct(item interface{}, b *strings.Builder, varSequence
 }
 
 // getFormatSymbol - returns the format from the struct field
-func (j *Serializer) getFormatSymbol(k reflect.Kind) (string, error) {
+func (s *Serializer) getFormatSymbol(k reflect.Kind) (string, error) {
 
 	switch k {
 	case reflect.String:
@@ -286,7 +286,7 @@ func (j *Serializer) getFormatSymbol(k reflect.Kind) (string, error) {
 }
 
 // getValueFromField - returns the value from the struct field
-func (j *Serializer) getValueFromField(field *reflect.StructField, value *reflect.Value) (string, error) {
+func (s *Serializer) getValueFromField(field *reflect.StructField, value *reflect.Value) (string, error) {
 
 	var kind reflect.Kind
 	if field == nil {
@@ -298,9 +298,9 @@ func (j *Serializer) getValueFromField(field *reflect.StructField, value *reflec
 	switch kind {
 	case reflect.String:
 		var b strings.Builder
-		s := value.String()
-		b.Grow(len(s) + 2 + (strings.Count(s, `"`) * 2))
-		j.writeStringValue(s, &b)
+		str := value.String()
+		b.Grow(len(str) + 2 + (strings.Count(str, `"`) * 2))
+		s.writeStringValue(str, &b)
 		return b.String(), nil
 	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint8, reflect.Uintptr, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int8:
 		return strconv.FormatInt(value.Int(), 10), nil
@@ -311,14 +311,14 @@ func (j *Serializer) getValueFromField(field *reflect.StructField, value *reflec
 	case reflect.Interface:
 		iface := value.Interface()
 		internalValue := reflect.ValueOf(iface)
-		return j.getValueFromField(nil, &internalValue)
+		return s.getValueFromField(nil, &internalValue)
 	default:
 		return "", fmt.Errorf("kind not mapped: %s", kind.String())
 	}
 }
 
 // writeStringValue - writes a string in JSON format
-func (j *Serializer) writeStringValue(value string, b *strings.Builder) {
+func (s *Serializer) writeStringValue(value string, b *strings.Builder) {
 
 	b.WriteByte(doubleQuote)
 
@@ -334,14 +334,14 @@ func (j *Serializer) writeStringValue(value string, b *strings.Builder) {
 }
 
 // writePropertyString - writes a string in JSON format
-func (j *Serializer) writePropertyString(name string, b *strings.Builder) {
+func (s *Serializer) writePropertyString(name string, b *strings.Builder) {
 
-	j.writeStringValue(name, b)
+	s.writeStringValue(name, b)
 	b.WriteString(":")
 }
 
 // fieldToProperty - try to write a property, returns if it's a json property, the type and the current path
-func (j *Serializer) fieldToProperty(field *reflect.StructField, b *strings.Builder, varSequence *[]string, variablePaths map[string]struct{}, path string) (bool, variableType, string) {
+func (s *Serializer) fieldToProperty(field *reflect.StructField, b *strings.Builder, varSequence *[]string, variablePaths map[string]struct{}, path string) (bool, variableType, string) {
 
 	tag, ok := field.Tag.Lookup("json")
 	if !ok {
@@ -350,9 +350,9 @@ func (j *Serializer) fieldToProperty(field *reflect.StructField, b *strings.Buil
 
 	tagValues := strings.Split(tag, ",")
 
-	j.writePropertyString(tagValues[0], b)
+	s.writePropertyString(tagValues[0], b)
 
-	propertyPath := j.buildPath(path, tagValues[0])
+	propertyPath := s.buildPath(path, tagValues[0])
 	varType := normalValue
 
 	if _, ok := variablePaths[propertyPath]; ok {
@@ -364,7 +364,7 @@ func (j *Serializer) fieldToProperty(field *reflect.StructField, b *strings.Buil
 }
 
 // buildPath - builds a new path
-func (j *Serializer) buildPath(path, new string) string {
+func (s *Serializer) buildPath(path, new string) string {
 
 	var temp strings.Builder
 	temp.Grow(len(path) + len(new) + 1)

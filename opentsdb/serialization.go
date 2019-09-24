@@ -20,7 +20,7 @@ const (
 )
 
 // SerializeGeneric - serializes with the correct cast based on the struct ArrayItem
-func (j *Serializer) SerializeGeneric(item interface{}) (string, error) {
+func (s *Serializer) SerializeGeneric(item interface{}) (string, error) {
 
 	if item == nil {
 		return "", nil
@@ -31,11 +31,11 @@ func (j *Serializer) SerializeGeneric(item interface{}) (string, error) {
 		return "", fmt.Errorf("unexpected instance type")
 	}
 
-	return j.Serialize(casted.Metric, casted.Timestamp, casted.Value, casted.Tags...)
+	return s.Serialize(casted.Metric, casted.Timestamp, casted.Value, casted.Tags...)
 }
 
 // SerializeGenericArray - serializes with the correct cast based on the struct ArrayItem
-func (j *Serializer) SerializeGenericArray(items ...interface{}) (string, error) {
+func (s *Serializer) SerializeGenericArray(items ...interface{}) (string, error) {
 
 	numItems := len(items)
 	if numItems == 0 {
@@ -52,7 +52,7 @@ func (j *Serializer) SerializeGenericArray(items ...interface{}) (string, error)
 		}
 	}
 
-	return j.SerializeArray(casted...)
+	return s.SerializeArray(casted...)
 }
 
 // SerializeArray - serializes an array of opentsdb data lines

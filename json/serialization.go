@@ -12,7 +12,7 @@ import (
 **/
 
 // SerializeGeneric - serializes with the correct cast based on the struct ArrayItem
-func (j *Serializer) SerializeGeneric(item interface{}) (string, error) {
+func (s *Serializer) SerializeGeneric(item interface{}) (string, error) {
 
 	if item == nil {
 		return "", nil
@@ -23,11 +23,11 @@ func (j *Serializer) SerializeGeneric(item interface{}) (string, error) {
 		return "", fmt.Errorf("unexpected instance type")
 	}
 
-	return j.Serialize(casted.Name, casted.Parameters...)
+	return s.Serialize(casted.Name, casted.Parameters...)
 }
 
 // SerializeGenericArray - serializes with the correct cast based on the struct ArrayItem
-func (j *Serializer) SerializeGenericArray(items ...interface{}) (string, error) {
+func (s *Serializer) SerializeGenericArray(items ...interface{}) (string, error) {
 
 	numItems := len(items)
 	if numItems == 0 {
@@ -44,11 +44,11 @@ func (j *Serializer) SerializeGenericArray(items ...interface{}) (string, error)
 		}
 	}
 
-	return j.SerializeArray(casted...)
+	return s.SerializeArray(casted...)
 }
 
 // SerializeArray - serializes an array of jsons
-func (j *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
+func (s *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
 
 	numItems := len(items)
 	if numItems == 0 {
@@ -60,7 +60,7 @@ func (j *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
 	jsons := make([]string, numItems)
 
 	for i := 0; i < numItems; i++ {
-		jsons[i], err = j.Serialize(items[i].Name, items[i].Parameters...)
+		jsons[i], err = s.Serialize(items[i].Name, items[i].Parameters...)
 		if err != nil {
 			return "", err
 		}
@@ -87,9 +87,9 @@ func (j *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
 }
 
 // Serialize - serializes a mapped JSON
-func (j *Serializer) Serialize(name string, parameters ...interface{}) (string, error) {
+func (s *Serializer) Serialize(name string, parameters ...interface{}) (string, error) {
 
-	m, ok := j.mapping[name]
+	m, ok := s.mapping[name]
 	if !ok {
 		return "", fmt.Errorf("no json mapping with name \"%s\"", name)
 	}
@@ -117,7 +117,7 @@ func (j *Serializer) Serialize(name string, parameters ...interface{}) (string, 
 
 		if kind == reflect.Map {
 
-			strMap, err := j.serializeMap(&value)
+			strMap, err := s.serializeMap(&value)
 			if err != nil {
 				return "", err
 			}
@@ -126,7 +126,7 @@ func (j *Serializer) Serialize(name string, parameters ...interface{}) (string, 
 
 		} else if kind == reflect.Array || kind == reflect.Slice {
 
-			strArray, err := j.serializeArray(&value)
+			strArray, err := s.serializeArray(&value)
 			if err != nil {
 				return "", err
 			}
@@ -167,7 +167,7 @@ func (j *Serializer) Serialize(name string, parameters ...interface{}) (string, 
 }
 
 // serializeMap - serializes a map to JSON format
-func (j *Serializer) serializeMap(value *reflect.Value) (string, error) {
+func (s *Serializer) serializeMap(value *reflect.Value) (string, error) {
 
 	it := value.MapRange()
 
@@ -180,12 +180,12 @@ func (j *Serializer) serializeMap(value *reflect.Value) (string, error) {
 		key := it.Key().String()
 		val := it.Value()
 
-		strVal, err := j.getValueFromField(nil, &val)
+		strVal, err := s.getValueFromField(nil, &val)
 		if err != nil {
 			return "", err
 		}
 
-		j.writeStringValue(key, &b)
+		s.writeStringValue(key, &b)
 		b.WriteString(":")
 		b.WriteString(strVal)
 
@@ -199,7 +199,7 @@ func (j *Serializer) serializeMap(value *reflect.Value) (string, error) {
 }
 
 // serializeArray - serializes an array to JSON format
-func (j *Serializer) serializeArray(value *reflect.Value) (string, error) {
+func (s *Serializer) serializeArray(value *reflect.Value) (string, error) {
 
 	arraySize := value.Len()
 
@@ -209,7 +209,7 @@ func (j *Serializer) serializeArray(value *reflect.Value) (string, error) {
 
 		val := value.Index(i)
 
-		strVal, err := j.getValueFromField(nil, &val)
+		strVal, err := s.getValueFromField(nil, &val)
 		if err != nil {
 			return "", err
 		}

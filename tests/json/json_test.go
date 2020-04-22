@@ -10,7 +10,6 @@ import (
 
 	serializer "github.com/uol/serializer/json"
 	"github.com/uol/serializer/tests"
-	"github.com/uol/timeline"
 )
 
 /**
@@ -104,7 +103,7 @@ func TestArrayNoVariables(t *testing.T) {
 	s := createSerializer()
 	addType(t, s, "s", newType)
 
-	result, err := s.SerializeArray([]serializer.ArrayItem{
+	result, err := s.SerializeArray([]*serializer.ArrayItem{
 		{Name: "s"},
 		{Name: "s"},
 		{Name: "s"},
@@ -165,7 +164,7 @@ func TestArrayVariables(t *testing.T) {
 	s := createSerializer()
 	addType(t, s, "s", newType, "boolean", "float", "integer")
 
-	result, err := s.SerializeArray([]serializer.ArrayItem{
+	result, err := s.SerializeArray([]*serializer.ArrayItem{
 		{Name: "s", Parameters: []interface{}{"boolean", true, "float", 1.0, "integer", 1}},
 		{Name: "s", Parameters: []interface{}{"boolean", false, "float", 2.0, "integer", 2}},
 		{Name: "s", Parameters: []interface{}{"boolean", true, "float", 3.0, "integer", 3}},
@@ -202,8 +201,8 @@ func TestArrayVariables(t *testing.T) {
 // TestCompositeStructJSON - test a complex json serialization
 func TestCompositeStructJSON(t *testing.T) {
 
-	p := timeline.NumberPoint{
-		Point: timeline.Point{
+	p := serializer.NumberPoint{
+		Point: serializer.Point{
 			Metric:    "metric1",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -222,8 +221,8 @@ func TestCompositeStructJSON(t *testing.T) {
 		"tags.host", "loghost",
 	)
 
-	expected := timeline.NumberPoint{
-		Point: timeline.Point{
+	expected := serializer.NumberPoint{
+		Point: serializer.Point{
 			Metric:    p.Metric,
 			Timestamp: p.Timestamp,
 			Tags: map[string]string{
@@ -235,7 +234,7 @@ func TestCompositeStructJSON(t *testing.T) {
 		Value: 100.5,
 	}
 
-	actual := timeline.NumberPoint{}
+	actual := serializer.NumberPoint{}
 	validateJSON(t, result, &expected, &actual)
 }
 
@@ -381,7 +380,7 @@ func TestGenericSerializer(t *testing.T) {
 		"text", "changed",
 	)
 
-	result2, err := s.SerializeGeneric(serializer.ArrayItem{
+	result2, err := s.SerializeGeneric(&serializer.ArrayItem{
 		Name: "s",
 		Parameters: []interface{}{
 			"boolean", false,
@@ -409,7 +408,7 @@ func TestGenericArraySerializer(t *testing.T) {
 	s := createSerializer()
 	addType(t, s, "s", newType, "boolean", "float", "integer")
 
-	itemArray := []serializer.ArrayItem{
+	itemArray := []*serializer.ArrayItem{
 		{Name: "s", Parameters: []interface{}{"boolean", true, "float", 1.0, "integer", 1}},
 		{Name: "s", Parameters: []interface{}{"boolean", false, "float", 2.0, "integer", 2}},
 		{Name: "s", Parameters: []interface{}{"boolean", true, "float", 3.0, "integer", 3}},
@@ -463,7 +462,7 @@ func TestArrayWithInvalidNumberOfTags(t *testing.T) {
 	s := createSerializer()
 	addType(t, s, "s", newType, "integer", "float")
 
-	items := []serializer.ArrayItem{
+	items := []*serializer.ArrayItem{
 		{Name: "s", Parameters: []interface{}{"integer", 1, "float", 10.0}},
 		{Name: "s", Parameters: []interface{}{"integer", 1, "float", 10.0}},
 		{Name: "s", Parameters: []interface{}{"integer", 1, 10.0}},

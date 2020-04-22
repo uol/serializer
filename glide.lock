@@ -1,5 +1,5 @@
-hash: 4ce333071a94056cd88a5a97ddfd75879f23c6df66ca6211985df3f9783bb202
-updated: 2020-04-22T11:54:33.23051166-03:00
+hash: 0a6cfc9d8c2df478b399445539ee8f0ecde03200407f180fe4fe5be16395ae11
+updated: 2020-04-22T18:33:10.198086303-03:00
 imports: []
 testImports:
 - name: github.com/davecgh/go-spew
@@ -22,7 +22,7 @@ testImports:
   - internal/cbor
   - internal/json
 - name: github.com/stretchr/testify
-  version: f35b8ab0b5a2cef36673838d662e249dd9c94686
+  version: 221dbe5ed46703ee255b1da0dec05086f5035f62
   subpackages:
   - assert
 - name: github.com/uol/funks
@@ -35,8 +35,6 @@ testImports:
   version: 3edd7d67bcde61e731d53144259cb50dd0f9931e
 - name: github.com/uol/timeline
   version: 30a157b41f4f92c59e062c03874028358658120e
-  subpackages:
-  - structs
 - name: golang.org/x/crypto
   version: 78000ba7a073cafc0278790f6bce552a0f25850e
   subpackages:
@@ -45,3 +43,5 @@ testImports:
   version: 5c8b2ff67527cb88b770f693cebf3799036d8bc0
   subpackages:
   - cpu
+- name: gopkg.in/yaml.v2
+  version: 53403b58ad1b561927d19068c655246f2db79d48

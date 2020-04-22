@@ -15,10 +15,10 @@ import (
 **/
 
 const (
-	put                = "put "
-	space              = " "
-	equal              = "="
-	lineSeparator byte = 10
+	strPut            string = "put "
+	strSpace          string = " "
+	strEqual          string = "="
+	byteLineSeparator byte   = 10
 )
 
 // SerializeGeneric - serializes with the correct cast based on the struct ArrayItem
@@ -28,7 +28,7 @@ func (s *Serializer) SerializeGeneric(item interface{}) (string, error) {
 		return serializer.Empty, nil
 	}
 
-	casted, ok := item.(ArrayItem)
+	casted, ok := item.(*ArrayItem)
 	if !ok {
 		return serializer.Empty, fmt.Errorf("unexpected instance type")
 	}
@@ -44,11 +44,11 @@ func (s *Serializer) SerializeGenericArray(items ...interface{}) (string, error)
 		return serializer.Empty, nil
 	}
 
-	casted := make([]ArrayItem, numItems)
+	casted := make([]*ArrayItem, numItems)
 
 	var ok bool
 	for i := 0; i < numItems; i++ {
-		casted[i], ok = items[i].(ArrayItem)
+		casted[i], ok = items[i].(*ArrayItem)
 		if !ok {
 			return serializer.Empty, fmt.Errorf("unexpected instance type on index: %d", i)
 		}
@@ -58,7 +58,7 @@ func (s *Serializer) SerializeGenericArray(items ...interface{}) (string, error)
 }
 
 // SerializeArray - serializes an array of opentsdb data lines
-func (s *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
+func (s *Serializer) SerializeArray(items ...*ArrayItem) (string, error) {
 
 	numItems := len(items)
 	if numItems == 0 {
@@ -102,13 +102,13 @@ func (s *Serializer) serializeLine(b *strings.Builder, metric string, timestamp 
 		return fmt.Errorf("the number of tags must be even")
 	}
 
-	b.WriteString(put)
+	b.WriteString(strPut)
 	b.WriteString(metric)
-	b.WriteString(space)
+	b.WriteString(strSpace)
 	b.WriteString(strconv.FormatInt(timestamp, 10))
-	b.WriteString(space)
-	b.WriteString(strconv.FormatFloat(value, 'f', -1, 64))
-	b.WriteString(space)
+	b.WriteString(strSpace)
+	b.WriteString(strconv.FormatFloat(value, serializer.ByteFloatFormat, -1, 64))
+	b.WriteString(strSpace)
 
 	for i := 0; i < numTags; i += 2 {
 
@@ -123,15 +123,15 @@ func (s *Serializer) serializeLine(b *strings.Builder, metric string, timestamp 
 		}
 
 		b.WriteString(key)
-		b.WriteString(equal)
+		b.WriteString(strEqual)
 		b.WriteString(value)
 
 		if i < numTags-2 {
-			b.WriteString(space)
+			b.WriteString(strSpace)
 		}
 	}
 
-	b.WriteByte(lineSeparator)
+	b.WriteByte(byteLineSeparator)
 
 	return nil
 }
@@ -148,7 +148,7 @@ func (s *Serializer) writeValue(tagValue interface{}) (string, error) {
 	case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint8, reflect.Uintptr, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int8:
 		return strconv.FormatInt(value.Int(), 10), nil
 	case reflect.Float32, reflect.Float64:
-		return strconv.FormatFloat(value.Float(), 'f', -1, 64), nil
+		return strconv.FormatFloat(value.Float(), serializer.ByteFloatFormat, -1, 64), nil
 	case reflect.Bool:
 		return strconv.FormatBool(value.Bool()), nil
 	default:

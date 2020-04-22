@@ -6,7 +6,6 @@ import (
 	"time"
 
 	serializer "github.com/uol/serializer/json"
-	"github.com/uol/timeline"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -17,9 +16,9 @@ import (
 **/
 
 var jsonIter = jsoniter.ConfigCompatibleWithStandardLibrary
-var numbers = []timeline.NumberPoint{
+var numbers = []serializer.NumberPoint{
 	{
-		Point: timeline.Point{
+		Point: serializer.Point{
 			Metric:    "metric1",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -32,7 +31,7 @@ var numbers = []timeline.NumberPoint{
 	},
 
 	{
-		Point: timeline.Point{
+		Point: serializer.Point{
 			Metric:    "metric2",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -45,9 +44,9 @@ var numbers = []timeline.NumberPoint{
 	},
 }
 
-var texts = []timeline.TextPoint{
+var texts = []serializer.TextPoint{
 	{
-		Point: timeline.Point{
+		Point: serializer.Point{
 			Metric:    "metric1",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -60,7 +59,7 @@ var texts = []timeline.TextPoint{
 	},
 
 	{
-		Point: timeline.Point{
+		Point: serializer.Point{
 			Metric:    "metric2",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -89,15 +88,15 @@ func BenchmarkJSONIter(b *testing.B) {
 
 func BenchmarkSerializer(b *testing.B) {
 	s := serializer.New(100)
-	s.Add("n", numbers[0], "metric", "value")
-	s.Add("t", texts[0], "metric", "text")
+	s.Add("n", &numbers[0], "metric", "value")
+	s.Add("t", &texts[0], "metric", "text")
 
 	for n := 0; n < b.N; n++ {
-		s.SerializeArray([]serializer.ArrayItem{
+		s.SerializeArray([]*serializer.ArrayItem{
 			{Name: "n", Parameters: []interface{}{"metric", "number", "value", 1.0}},
 			{Name: "n", Parameters: []interface{}{"metric", "number", "value", 2.0}},
 		}...)
-		s.SerializeArray([]serializer.ArrayItem{
+		s.SerializeArray([]*serializer.ArrayItem{
 			{Name: "t", Parameters: []interface{}{"metric", "text", "text", "1.0"}},
 			{Name: "t", Parameters: []interface{}{"metric", "text", "text", "2.0"}},
 		}...)

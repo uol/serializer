@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/uol/gobol/structs"
 	serializer "github.com/uol/serializer/json"
+	"github.com/uol/timeline"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -17,9 +17,9 @@ import (
 **/
 
 var jsonIter = jsoniter.ConfigCompatibleWithStandardLibrary
-var numbers = []structs.NumberPoint{
-	structs.NumberPoint{
-		Point: structs.Point{
+var numbers = []timeline.NumberPoint{
+	{
+		Point: timeline.Point{
 			Metric:    "metric1",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -31,8 +31,8 @@ var numbers = []structs.NumberPoint{
 		Value: 1.0,
 	},
 
-	structs.NumberPoint{
-		Point: structs.Point{
+	{
+		Point: timeline.Point{
 			Metric:    "metric2",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -45,9 +45,9 @@ var numbers = []structs.NumberPoint{
 	},
 }
 
-var texts = []structs.TextPoint{
-	structs.TextPoint{
-		Point: structs.Point{
+var texts = []timeline.TextPoint{
+	{
+		Point: timeline.Point{
 			Metric:    "metric1",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -59,8 +59,8 @@ var texts = []structs.TextPoint{
 		Text: "test1",
 	},
 
-	structs.TextPoint{
-		Point: structs.Point{
+	{
+		Point: timeline.Point{
 			Metric:    "metric2",
 			Timestamp: time.Now().Unix(),
 			Tags: map[string]string{
@@ -94,12 +94,12 @@ func BenchmarkSerializer(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		s.SerializeArray([]serializer.ArrayItem{
-			serializer.ArrayItem{Name: "n", Parameters: []interface{}{"metric", "number", "value", 1.0}},
-			serializer.ArrayItem{Name: "n", Parameters: []interface{}{"metric", "number", "value", 2.0}},
+			{Name: "n", Parameters: []interface{}{"metric", "number", "value", 1.0}},
+			{Name: "n", Parameters: []interface{}{"metric", "number", "value", 2.0}},
 		}...)
 		s.SerializeArray([]serializer.ArrayItem{
-			serializer.ArrayItem{Name: "t", Parameters: []interface{}{"metric", "text", "text", "1.0"}},
-			serializer.ArrayItem{Name: "t", Parameters: []interface{}{"metric", "text", "text", "2.0"}},
+			{Name: "t", Parameters: []interface{}{"metric", "text", "text", "1.0"}},
+			{Name: "t", Parameters: []interface{}{"metric", "text", "text", "2.0"}},
 		}...)
 	}
 }

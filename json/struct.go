@@ -16,7 +16,9 @@ const (
 
 var (
 	doubleQuote        = ([]byte("\""))[0]
+	escapeBar          = ([]byte("\\"))[0]
 	escapedDoubleQuote = "\\\""
+	escapedEscapeBar   = "\\\\"
 )
 
 // mappedJSON - internal mapped JSON struct

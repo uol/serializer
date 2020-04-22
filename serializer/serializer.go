@@ -1,5 +1,10 @@
 package serializer
 
+const (
+	// Empty - defines an empty string
+	Empty string = ""
+)
+
 // Serializer - a generic way to serialize
 type Serializer interface {
 

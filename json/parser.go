@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/uol/serializer/serializer"
 )
 
 /**
@@ -42,7 +44,7 @@ func (s *Serializer) mapJSON(item interface{}, variablePaths map[string]struct{}
 
 	b.WriteString("{")
 
-	err := s.mapStruct(item, &b, &varSequence, variablePaths, "")
+	err := s.mapStruct(item, &b, &varSequence, variablePaths, serializer.Empty)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +283,7 @@ func (s *Serializer) getFormatSymbol(k reflect.Kind) (string, error) {
 	case reflect.Bool:
 		return "%t", nil
 	default:
-		return "", fmt.Errorf("type not mapped: %d", k)
+		return serializer.Empty, fmt.Errorf("type not mapped: %d", k)
 	}
 }
 
@@ -313,7 +315,7 @@ func (s *Serializer) getValueFromField(field *reflect.StructField, value *reflec
 		internalValue := reflect.ValueOf(iface)
 		return s.getValueFromField(nil, &internalValue)
 	default:
-		return "", fmt.Errorf("kind not mapped: %s", kind.String())
+		return serializer.Empty, fmt.Errorf("kind not mapped: %s", kind.String())
 	}
 }
 
@@ -325,6 +327,8 @@ func (s *Serializer) writeStringValue(value string, b *strings.Builder) {
 	for _, c := range []byte(value) {
 		if c == doubleQuote {
 			b.WriteString(escapedDoubleQuote)
+		} else if c == escapeBar {
+			b.WriteString(escapedEscapeBar)
 		} else {
 			b.WriteByte(c)
 		}

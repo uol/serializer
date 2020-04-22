@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/uol/serializer/serializer"
 )
 
 /**
@@ -23,12 +25,12 @@ const (
 func (s *Serializer) SerializeGeneric(item interface{}) (string, error) {
 
 	if item == nil {
-		return "", nil
+		return serializer.Empty, nil
 	}
 
 	casted, ok := item.(ArrayItem)
 	if !ok {
-		return "", fmt.Errorf("unexpected instance type")
+		return serializer.Empty, fmt.Errorf("unexpected instance type")
 	}
 
 	return s.Serialize(casted.Metric, casted.Timestamp, casted.Value, casted.Tags...)
@@ -39,7 +41,7 @@ func (s *Serializer) SerializeGenericArray(items ...interface{}) (string, error)
 
 	numItems := len(items)
 	if numItems == 0 {
-		return "", nil
+		return serializer.Empty, nil
 	}
 
 	casted := make([]ArrayItem, numItems)
@@ -48,7 +50,7 @@ func (s *Serializer) SerializeGenericArray(items ...interface{}) (string, error)
 	for i := 0; i < numItems; i++ {
 		casted[i], ok = items[i].(ArrayItem)
 		if !ok {
-			return "", fmt.Errorf("unexpected instance type on index: %d", i)
+			return serializer.Empty, fmt.Errorf("unexpected instance type on index: %d", i)
 		}
 	}
 
@@ -60,7 +62,7 @@ func (s *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
 
 	numItems := len(items)
 	if numItems == 0 {
-		return "", nil
+		return serializer.Empty, nil
 	}
 
 	var b strings.Builder
@@ -70,7 +72,7 @@ func (s *Serializer) SerializeArray(items ...ArrayItem) (string, error) {
 	for i := 0; i < numItems; i++ {
 		err = s.serializeLine(&b, items[i].Metric, items[i].Timestamp, items[i].Value, items[i].Tags...)
 		if err != nil {
-			return "", nil
+			return serializer.Empty, err
 		}
 	}
 
@@ -85,7 +87,7 @@ func (s *Serializer) Serialize(metric string, timestamp int64, value float64, ta
 
 	err := s.serializeLine(&b, metric, timestamp, value, tags...)
 	if err != nil {
-		return "", err
+		return serializer.Empty, err
 	}
 
 	return b.String(), nil
@@ -150,6 +152,6 @@ func (s *Serializer) writeValue(tagValue interface{}) (string, error) {
 	case reflect.Bool:
 		return strconv.FormatBool(value.Bool()), nil
 	default:
-		return "", fmt.Errorf("kind not mapped: %s", kind.String())
+		return serializer.Empty, fmt.Errorf("kind not mapped: %s", kind.String())
 	}
 }

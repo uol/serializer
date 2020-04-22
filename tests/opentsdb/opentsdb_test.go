@@ -220,3 +220,59 @@ func TestGenericArraySerializer(t *testing.T) {
 
 	assert.Equal(t, result1, result2, "expected same output")
 }
+
+// TestSingleInvalidNumberOfTags - tests a single line, invalid number of string tags
+func TestSingleInvalidNumberOfTags(t *testing.T) {
+
+	s := createSerializer()
+
+	_, err := s.Serialize(
+		"validation",
+		time.Now().Unix(),
+		float64(tests.GenerateRandom(1, 100)),
+		"localhost",
+		"ttl", "1",
+	)
+
+	assert.Error(t, err, "expected a validation error")
+}
+
+// TestArrayWithInvalidNumberOfTags - tests an array of items, invalid number of string tags
+func TestArrayWithInvalidNumberOfTags(t *testing.T) {
+
+	s := createSerializer()
+
+	items := []serializer.ArrayItem{
+		{
+			Metric:    "validation1",
+			Timestamp: time.Now().Unix(),
+			Value:     float64(tests.GenerateRandom(1, 100)),
+			Tags: []interface{}{
+				"host", "localhost",
+				"ttl", "1",
+			},
+		},
+		{
+			Metric:    "validation2-missing-ttl",
+			Timestamp: time.Now().Unix(),
+			Value:     float64(tests.GenerateRandom(1, 100)),
+			Tags: []interface{}{
+				"host", "localhost",
+				"ttl", //missing ttl
+			},
+		},
+		{
+			Metric:    "validation3",
+			Timestamp: time.Now().Unix(),
+			Value:     float64(tests.GenerateRandom(1, 100)),
+			Tags: []interface{}{
+				"host", "localhost",
+				"ttl", "1",
+			},
+		},
+	}
+
+	_, err := s.SerializeArray(items...)
+
+	assert.Error(t, err, "expected a validation error")
+}

@@ -88,17 +88,24 @@ func BenchmarkJSONIter(b *testing.B) {
 
 func BenchmarkSerializer(b *testing.B) {
 	s := serializer.New(100)
-	s.Add("n", &numbers[0], "metric", "value")
-	s.Add("t", &texts[0], "metric", "text")
+
+	s.Add("n", numbers[0], "metric", "value")
+	s.Add("t", texts[0], "metric", "text")
+
+	numberTypeParams := []*serializer.ArrayItem{
+		{Name: "n", Parameters: []interface{}{"metric", "number", "value", 1.0}},
+		{Name: "n", Parameters: []interface{}{"metric", "number", "value", 2.0}},
+	}
+
+	textTypeParams := []*serializer.ArrayItem{
+		{Name: "t", Parameters: []interface{}{"metric", "text", "text", "1.0"}},
+		{Name: "t", Parameters: []interface{}{"metric", "text", "text", "2.0"}},
+	}
+
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		s.SerializeArray([]*serializer.ArrayItem{
-			{Name: "n", Parameters: []interface{}{"metric", "number", "value", 1.0}},
-			{Name: "n", Parameters: []interface{}{"metric", "number", "value", 2.0}},
-		}...)
-		s.SerializeArray([]*serializer.ArrayItem{
-			{Name: "t", Parameters: []interface{}{"metric", "text", "text", "1.0"}},
-			{Name: "t", Parameters: []interface{}{"metric", "text", "text", "2.0"}},
-		}...)
+		s.SerializeArray(numberTypeParams...)
+		s.SerializeArray(textTypeParams...)
 	}
 }

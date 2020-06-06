@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	gotest "github.com/uol/gotest/utils"
 	serializer "github.com/uol/serializer/opentsdb"
 	"github.com/uol/serializer/tests"
 )
@@ -50,7 +51,7 @@ func TestSingleLineStringTags(t *testing.T) {
 	line := &serializer.ArrayItem{
 		Metric:    "single",
 		Timestamp: time.Now().Unix(),
-		Value:     float64(tests.GenerateRandom(1, 100)),
+		Value:     float64(gotest.RandomInt(1, 100)),
 		Tags: []interface{}{
 			"host", "localhost",
 			"ttl", "1",
@@ -71,12 +72,12 @@ func TestSingleLineMixedTypeTags(t *testing.T) {
 	line := &serializer.ArrayItem{
 		Metric:    "single",
 		Timestamp: time.Now().Unix(),
-		Value:     float64(tests.GenerateRandom(10, 100)) + 0.5,
+		Value:     float64(gotest.RandomInt(10, 100)) + 0.5,
 		Tags: []interface{}{
 			"host", "localhost",
 			"ttl", 1,
-			"float", float64(tests.GenerateRandom(300, 1000)) + 0.1,
-			"boolean", tests.GenerateRandom(0, 10) >= 5,
+			"float", float64(gotest.RandomInt(300, 1000)) + 0.1,
+			"boolean", gotest.RandomInt(0, 10) >= 5,
 		},
 	}
 
@@ -138,8 +139,8 @@ func TestMultiLineMixedTypeTags(t *testing.T) {
 			Tags: []interface{}{
 				"host", "host" + strconv.Itoa(i),
 				"index", i,
-				"float", float64(tests.GenerateRandom(300, 1000)) + 0.1,
-				"boolean", tests.GenerateRandom(0, 10) >= 5,
+				"float", float64(gotest.RandomInt(300, 1000)) + 0.1,
+				"boolean", gotest.RandomInt(0, 10) >= 5,
 			},
 		}
 
@@ -162,12 +163,12 @@ func TestGenericSerializer(t *testing.T) {
 	line := &serializer.ArrayItem{
 		Metric:    "single",
 		Timestamp: time.Now().Unix(),
-		Value:     float64(tests.GenerateRandom(10, 100)) + 0.5,
+		Value:     float64(gotest.RandomInt(10, 100)) + 0.5,
 		Tags: []interface{}{
 			"host", "localhost",
 			"ttl", 1,
-			"float", float64(tests.GenerateRandom(300, 1000)) + 0.1,
-			"boolean", tests.GenerateRandom(0, 10) >= 5,
+			"float", float64(gotest.RandomInt(300, 1000)) + 0.1,
+			"boolean", gotest.RandomInt(0, 10) >= 5,
 		},
 	}
 
@@ -200,8 +201,8 @@ func TestGenericArraySerializer(t *testing.T) {
 			Tags: []interface{}{
 				"host", "host" + strconv.Itoa(i),
 				"index", i,
-				"float", float64(tests.GenerateRandom(300, 1000)) + 0.1,
-				"boolean", tests.GenerateRandom(0, 10) >= 5,
+				"float", float64(gotest.RandomInt(300, 1000)) + 0.1,
+				"boolean", gotest.RandomInt(0, 10) >= 5,
 			},
 		}
 
@@ -229,7 +230,7 @@ func TestSingleInvalidNumberOfTags(t *testing.T) {
 	_, err := s.Serialize(
 		"validation",
 		time.Now().Unix(),
-		float64(tests.GenerateRandom(1, 100)),
+		float64(gotest.RandomInt(1, 100)),
 		"localhost",
 		"ttl", "1",
 	)
@@ -246,7 +247,7 @@ func TestArrayWithInvalidNumberOfTags(t *testing.T) {
 		{
 			Metric:    "validation1",
 			Timestamp: time.Now().Unix(),
-			Value:     float64(tests.GenerateRandom(1, 100)),
+			Value:     float64(gotest.RandomInt(1, 100)),
 			Tags: []interface{}{
 				"host", "localhost",
 				"ttl", "1",
@@ -255,7 +256,7 @@ func TestArrayWithInvalidNumberOfTags(t *testing.T) {
 		{
 			Metric:    "validation2-missing-ttl",
 			Timestamp: time.Now().Unix(),
-			Value:     float64(tests.GenerateRandom(1, 100)),
+			Value:     float64(gotest.RandomInt(1, 100)),
 			Tags: []interface{}{
 				"host", "localhost",
 				"ttl", //missing ttl
@@ -264,7 +265,7 @@ func TestArrayWithInvalidNumberOfTags(t *testing.T) {
 		{
 			Metric:    "validation3",
 			Timestamp: time.Now().Unix(),
-			Value:     float64(tests.GenerateRandom(1, 100)),
+			Value:     float64(gotest.RandomInt(1, 100)),
 			Tags: []interface{}{
 				"host", "localhost",
 				"ttl", "1",
@@ -275,4 +276,130 @@ func TestArrayWithInvalidNumberOfTags(t *testing.T) {
 	_, err := s.SerializeArray(items...)
 
 	assert.Error(t, err, "expected a validation error")
+}
+
+// TestSingleTagWithNullKey - tests a single line, tag with null key
+func TestSingleTagWithNullKey(t *testing.T) {
+
+	s := createSerializer()
+
+	_, err := s.Serialize(
+		"validation",
+		time.Now().Unix(),
+		float64(gotest.RandomInt(1, 100)),
+		"ksid", "test",
+		nil, "1",
+	)
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+
+	line := &serializer.ArrayItem{
+		Metric:    "single",
+		Timestamp: time.Now().Unix(),
+		Value:     float64(gotest.RandomInt(10, 100)) + 0.5,
+		Tags: []interface{}{
+			nil, "localhost",
+			"ttl", 1,
+			"float", float64(gotest.RandomInt(300, 1000)) + 0.1,
+			"boolean", gotest.RandomInt(0, 10) >= 5,
+		},
+	}
+
+	_, err = s.SerializeGeneric(line)
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+
+	items := []*serializer.ArrayItem{
+		{
+			Metric:    "validation1",
+			Timestamp: time.Now().Unix(),
+			Value:     float64(gotest.RandomInt(1, 100)),
+			Tags: []interface{}{
+				"host", "localhost",
+				nil, "1",
+			},
+		},
+		{
+			Metric:    "validation2-missing-ttl",
+			Timestamp: time.Now().Unix(),
+			Value:     float64(gotest.RandomInt(1, 100)),
+			Tags: []interface{}{
+				nil, "localhost",
+				"ttl", "7",
+			},
+		},
+	}
+
+	_, err = s.SerializeArray(items...)
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+}
+
+// TestSingleTagWithNullValue - tests a single line, tag with null value
+func TestSingleTagWithNullValue(t *testing.T) {
+
+	s := createSerializer()
+
+	_, err := s.Serialize(
+		"validation",
+		time.Now().Unix(),
+		float64(gotest.RandomInt(1, 100)),
+		"ksid", "test",
+		"ttl", nil,
+	)
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+
+	line := &serializer.ArrayItem{
+		Metric:    "single",
+		Timestamp: time.Now().Unix(),
+		Value:     float64(gotest.RandomInt(10, 100)) + 0.5,
+		Tags: []interface{}{
+			"host", "localhost",
+			"ttl", 1,
+			"float", nil,
+			"boolean", gotest.RandomInt(0, 10) >= 5,
+		},
+	}
+
+	_, err = s.SerializeGeneric(line)
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+
+	items := []*serializer.ArrayItem{
+		{
+			Metric:    "validation1",
+			Timestamp: time.Now().Unix(),
+			Value:     float64(gotest.RandomInt(1, 100)),
+			Tags: []interface{}{
+				"host", nil,
+				"ttl", "1",
+			},
+		},
+		{
+			Metric:    "validation2-missing-ttl",
+			Timestamp: time.Now().Unix(),
+			Value:     float64(gotest.RandomInt(1, 100)),
+			Tags: []interface{}{
+				"host", "localhost",
+				"ttl", nil,
+			},
+		},
+	}
+
+	_, err = s.SerializeArray(items...)
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
 }

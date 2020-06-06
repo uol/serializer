@@ -1,8 +1,15 @@
 package serializer
 
+import (
+	"reflect"
+)
+
 const (
 	// Empty - defines an empty string
 	Empty string = ""
+
+	// Null - defines an null string
+	Null string = "null"
 
 	// ByteFloatFormat - defines the float format
 	ByteFloatFormat byte = 'f'
@@ -16,4 +23,20 @@ type Serializer interface {
 
 	// SerializeGenericArray - serializes with the correct cast based on the struct ArrayItem
 	SerializeGenericArray(item ...interface{}) (string, error)
+}
+
+// InterfaceHasZeroValue - is a value from a interface zero? (nil)
+func InterfaceHasZeroValue(x interface{}) bool {
+
+	if x == nil {
+		return true
+	}
+
+	typeOf := reflect.TypeOf(x)
+
+	if typeOf.Kind() != reflect.Interface {
+		return false
+	}
+
+	return x == reflect.Zero(typeOf).Interface()
 }

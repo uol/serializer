@@ -103,12 +103,20 @@ func (s *Serializer) Serialize(name string, parameters ...interface{}) (string, 
 	params := make([]interface{}, m.numVariables)
 	for i := 0; i < len(parameters); i += 2 {
 
+		if serializer.InterfaceHasZeroValue(parameters[i]) {
+			return serializer.Null, fmt.Errorf("variable name is null on index %d", i)
+		}
+
 		varName, ok := parameters[i].(string)
 		if !ok {
 			return serializer.Empty, fmt.Errorf("error casting variable index %d to string", i)
 		}
 
 		genericValue := parameters[i+1]
+		if serializer.InterfaceHasZeroValue(genericValue) {
+			return serializer.Null, fmt.Errorf("value is null on index %d", i+1)
+		}
+
 		value := reflect.ValueOf(genericValue)
 		kind := value.Kind()
 

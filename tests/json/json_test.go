@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	gotest "github.com/uol/gotest/utils"
 	serializer "github.com/uol/serializer/json"
 	"github.com/uol/serializer/tests"
 )
@@ -76,8 +77,8 @@ func TestNoVariables(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "test",
 	}
 
@@ -95,8 +96,8 @@ func TestArrayNoVariables(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: false,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "array",
 	}
 
@@ -127,8 +128,8 @@ func TestVariables(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "variable",
 	}
 
@@ -156,8 +157,8 @@ func TestArrayVariables(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: false,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "array",
 	}
 
@@ -336,8 +337,8 @@ func TestJSONEncoding(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: false,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    `"unchanged"`,
 	}
 
@@ -367,8 +368,8 @@ func TestGenericSerializer(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "generic",
 	}
 
@@ -400,8 +401,8 @@ func TestGenericArraySerializer(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "generic",
 	}
 
@@ -437,8 +438,8 @@ func TestInvalidNumberOfTags(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "variable",
 	}
 
@@ -454,8 +455,8 @@ func TestArrayWithInvalidNumberOfTags(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "variable",
 	}
 
@@ -477,8 +478,8 @@ func TestSpecialChars(t *testing.T) {
 
 	newType := SimpleJSON{
 		Boolean: true,
-		Float:   float64(tests.GenerateRandom(0, 100)),
-		Integer: tests.GenerateRandom(0, 1000),
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
 		Text:    "\\\"test\"",
 	}
 
@@ -489,4 +490,112 @@ func TestSpecialChars(t *testing.T) {
 
 	actual := SimpleJSON{}
 	validateJSON(t, result, &newType, &actual)
+}
+
+// TestNullKey - tests a json with null key
+func TestNullKey(t *testing.T) {
+
+	newType := SimpleJSON{
+		Boolean: true,
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
+		Text:    "variable",
+	}
+
+	s := createSerializer()
+	addType(t, s, "s", newType, "integer", "float")
+
+	_, err := s.Serialize(
+		"s",
+		nil, gotest.RandomInt(0, 1000),
+		nil, float64(gotest.RandomInt(0, 100)),
+	)
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+
+	_, err = s.SerializeGeneric(&serializer.ArrayItem{
+		Name: "s",
+		Parameters: []interface{}{
+			nil, gotest.RandomInt(0, 1000),
+			nil, float64(gotest.RandomInt(0, 100)),
+		},
+	})
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+
+	items := []*serializer.ArrayItem{
+		{Name: "s", Parameters: []interface{}{
+			nil, gotest.RandomInt(0, 1000),
+			nil, float64(gotest.RandomInt(0, 100)),
+		}},
+		{Name: "s", Parameters: []interface{}{
+			nil, gotest.RandomInt(0, 1000),
+			nil, float64(gotest.RandomInt(0, 100)),
+		}},
+		{Name: "s", Parameters: []interface{}{
+			nil, gotest.RandomInt(0, 1000),
+			nil, float64(gotest.RandomInt(0, 100)),
+		}},
+	}
+
+	_, err = s.SerializeArray(items...)
+	tests.CheckNullErrorValidation(t, err)
+}
+
+// TestNullValue - tests a json with null value
+func TestNullValue(t *testing.T) {
+
+	newType := SimpleJSON{
+		Boolean: true,
+		Float:   float64(gotest.RandomInt(0, 100)),
+		Integer: gotest.RandomInt(0, 1000),
+		Text:    "variable",
+	}
+
+	s := createSerializer()
+	addType(t, s, "s", newType, "integer", "float")
+
+	_, err := s.Serialize(
+		"s",
+		"integer", nil,
+		"float", nil,
+	)
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+
+	_, err = s.SerializeGeneric(&serializer.ArrayItem{
+		Name: "s",
+		Parameters: []interface{}{
+			"integer", nil,
+			"float", nil,
+		},
+	})
+
+	if !tests.CheckNullErrorValidation(t, err) {
+		return
+	}
+
+	items := []*serializer.ArrayItem{
+		{Name: "s", Parameters: []interface{}{
+			"integer", nil,
+			"float", nil,
+		}},
+		{Name: "s", Parameters: []interface{}{
+			"integer", nil,
+			"float", nil,
+		}},
+		{Name: "s", Parameters: []interface{}{
+			"integer", nil,
+			"float", nil,
+		}},
+	}
+
+	_, err = s.SerializeArray(items...)
+	tests.CheckNullErrorValidation(t, err)
 }

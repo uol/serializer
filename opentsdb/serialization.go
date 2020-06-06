@@ -112,12 +112,22 @@ func (s *Serializer) serializeLine(b *strings.Builder, metric string, timestamp 
 
 	for i := 0; i < numTags; i += 2 {
 
+		if serializer.InterfaceHasZeroValue(tags[i]) {
+			return fmt.Errorf("tag name is null on index %d", i)
+		}
+
 		key, ok := tags[i].(string)
 		if !ok {
 			return fmt.Errorf("error casting tag key to string")
 		}
 
-		value, err := s.writeValue(tags[i+1])
+		tagValue := tags[i+1]
+
+		if serializer.InterfaceHasZeroValue(tagValue) {
+			return fmt.Errorf("tag value is null on index %d", i+i)
+		}
+
+		value, err := s.writeValue(tagValue)
 		if err != nil {
 			return err
 		}
@@ -138,6 +148,10 @@ func (s *Serializer) serializeLine(b *strings.Builder, metric string, timestamp 
 
 // writeValue - returns the value from the reflected interface value
 func (s *Serializer) writeValue(tagValue interface{}) (string, error) {
+
+	if serializer.InterfaceHasZeroValue(tagValue) {
+		return serializer.Null, fmt.Errorf("null value found")
+	}
 
 	value := reflect.ValueOf(tagValue)
 	kind := value.Kind()

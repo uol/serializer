@@ -60,6 +60,8 @@ func (s *Serializer) SerializeGenericArray(items ...interface{}) (string, error)
 // SerializeArray - serializes an array of opentsdb data lines
 func (s *Serializer) SerializeArray(items ...*ArrayItem) (string, error) {
 
+	defer serializer.PanicHandler()
+
 	numItems := len(items)
 	if numItems == 0 {
 		return serializer.Empty, nil
@@ -81,6 +83,8 @@ func (s *Serializer) SerializeArray(items ...*ArrayItem) (string, error) {
 
 // Serialize - serializes an opentsdb data line
 func (s *Serializer) Serialize(metric string, timestamp int64, value float64, tags ...interface{}) (string, error) {
+
+	defer serializer.PanicHandler()
 
 	var b strings.Builder
 	b.Grow(s.bufferSize)

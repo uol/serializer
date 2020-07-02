@@ -52,6 +52,8 @@ func (s *Serializer) SerializeGenericArray(items ...interface{}) (string, error)
 // SerializeArray - serializes an array of jsons
 func (s *Serializer) SerializeArray(items ...*ArrayItem) (string, error) {
 
+	defer serializer.PanicHandler()
+
 	numItems := len(items)
 	if numItems == 0 {
 		return serializer.Empty, nil
@@ -90,6 +92,8 @@ func (s *Serializer) SerializeArray(items ...*ArrayItem) (string, error) {
 
 // Serialize - serializes a mapped JSON
 func (s *Serializer) Serialize(name string, parameters ...interface{}) (string, error) {
+
+	defer serializer.PanicHandler()
 
 	m, ok := s.mapping[name]
 	if !ok {

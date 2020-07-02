@@ -1,6 +1,7 @@
 package serializer
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -39,4 +40,11 @@ func InterfaceHasZeroValue(x interface{}) bool {
 	}
 
 	return x == reflect.Zero(typeOf).Interface()
+}
+
+// PanicHandler - handles an unexpected panic
+func PanicHandler() {
+	if r := recover(); r != nil {
+		fmt.Println("[critical error] unexpected error on serializer library:", r)
+	}
 }
